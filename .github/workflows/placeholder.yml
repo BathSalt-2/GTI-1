@@ -1,0 +1,12 @@
+name: Pages Placeholder
+run-name: Deploy placeholder page
+run-name: placeholder
+on: push:
+  branches:
+    - "main"
+jobs:
+  deploy:
+    runs-on:: ubuntu-latest
+    steps:
+      - name: Check out latest code
+        uses: actions/checkout@v2
