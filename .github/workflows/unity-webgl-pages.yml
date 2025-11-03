@@ -1,0 +1,53 @@
+name: Build Unity WebGL and Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - 'man&
+  workflow_dispatch:
+
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build WebGL
+    runs-on: ubuntu-latest
+    if: secrets.UNITY_LICENSE != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build (Unity WebGL)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITR_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          targetPlatform: WebGL
+          projectPath: .
+          allowDirtyBuild: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/WebGL
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    if: needs.build.result == 'success'
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
